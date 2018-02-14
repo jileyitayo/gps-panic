@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- <link rel="icon" href="../../../../favicon.ico"> -->
+
+    <title>Panik App</title>
+    <style type="text/css">
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 100%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      .controls {
+        margin-top: 10px;
+        border: 1px solid transparent;
+        border-radius: 2px 0 0 2px;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        height: 32px;
+        outline: none;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      }
+      #origin-input{
+        background-color: #fff;
+        font-family: Roboto;
+        font-size: 15px;
+        font-weight: 300;
+        margin-left: 12px;
+        padding: 0 11px 0 13px;
+        text-overflow: ellipsis;
+        width: 200px;
+      }
+
+      #origin-input:focus{
+        border-color: #4d90fe;
+      }
+    </style>
+  </head>
+
+  <body>
+  <input id="origin-input" class="controls" type="text"
+         value="Get Direction">
+    <div id="map"></div>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="socket.io.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDApLirENPZvOkMbHh0qjAjGI7RFSJ7ckI&callback=initMap" async defer></script>
+    <script type="text/javascript">
+        var map, geocoder, infoWindow;
+        function initMap() {
+            var mapLayer = document.getElementById("map");
+//            var centerCoordinates = new google.maps.LatLng(37.6, -95.665);
+            var centerCoordinates = {lat: 37.6, lng: -95.665};
+            var defaultOptions = { center: centerCoordinates, zoom: 9 };
+
+            map = new google.maps.Map(mapLayer, defaultOptions);
+            locate();
+            //geocodeLatLng(map, -34.397, 150.644);
+        }
+
+        function geocodeLatLng(map, lat, long) {
+            var geocoder = new google.maps.Geocoder;
+            var infowindow1 = new google.maps.InfoWindow;
+            var latlng = {lat: parseFloat(lat), lng: parseFloat(long)};
+            geocoder.geocode({'location': latlng}, function(results, status) {
+                if (status === 'OK') {
+                    if (results[0]) {
+//                        map.setZoom(10);
+                        var marker = new google.maps.Marker({
+                            position: latlng,
+                            map: map
+                        });
+//                        map.setCenter(marker.getPosition());
+//                        map.panTo(marker.getPosition());
+                        infowindow1.setContent(results[0].formatted_address);
+                        infowindow1.open(map, marker);
+                    } else {
+                        window.alert('No results found');
+                    }
+                } else {
+                    window.alert('Geocoder failed due to: ' + status);
+                }
+            });
+        }
+
+        function locate(){
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var currentLatitude = position.coords.latitude;
+                    var currentLongitude = position.coords.longitude;
+                    var pos = {
+                        lat: currentLatitude,
+                        lng: currentLongitude
+                    };
+                    var infoWindowHTML = "<b>Location found</b><br>Latitude: " + currentLatitude + "<br>Longitude: " + currentLongitude;
+                    infoWindow = new google.maps.InfoWindow({map: map, content: infoWindowHTML});
+                    infoWindow.setPosition(pos);
+                    map.setCenter(pos);
+                    map.setZoom(8);
+//                    infoWindow.setContent('Location found.');
+                    infoWindow.open(map);
+                }, function() {
+                        handleLocationError(true, infoWindow, map.getCenter());
+                });
+            } else {
+                // Browser doesn't support Geolocation
+                handleLocationError(false, infoWindow, map.getCenter());
+            }
+        }
+        function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+            infoWindow.setPosition(pos);
+            infoWindow.setContent(browserHasGeolocation ?
+                'Error: The Geolocation service failed.' :
+                'Error: Your browser doesn\'t support geolocation.');
+            infoWindow.open(map);
+        }
+
+
+        (function(){
+            var pfield1 = "",pfield2= "",pfield3= "",pfield4= "",pfield5= "";
+
+              //connect to socket.io
+             // var socket = io.connect('http://solarmonitoring.zichelectric.co');
+             var socket = io.connect('http://127.0.0.1:3000');
+
+             /*
+             Template
+             field1: Longitude
+             field2: Latitude
+             field3: Date
+             field4: Time
+             field5: TimeZone
+             */
+
+             if(socket !== undefined){
+               socket.emit('ready');
+               //Get status from server
+               socket.on('output', function(data){
+
+                 console.log(data);
+                 if(data != null){
+                     if(data.field1 !== pfield1 || data.field2 !== pfield2){
+                         pfield1 = data.field1; // long
+                         pfield2 = data.field2; // lat
+                         //plot it here
+                         geocodeLatLng(map, pfield2, pfield1);
+                         geocodeLatLng(map, 7.369169, 3.820535);
+                         geocodeLatLng(map, 6.802245, 4.589578);
+                         geocodeLatLng(map, 7.020375, 3.095437);
+//                         alert("plotting");
+                     }
+                   // longitude.html(data.field1);
+                   // latitude.html(data.field2);
+                   // panikDate.html(data.field3);
+                   // panikTime.html(data.field4);
+                   // timezone.html(data.field5);
+
+                   // var d = new Date(data.created_at);
+                   // dateupdate.html(d.toDateString()+ ' ' + getPM(d));
+                 }
+               });
+
+               socket.on('date', function(data){
+                 // $('#dateval').html(data.date);
+               });
+             }
+
+
+
+
+        })();
+    </script>
+  </body>
+</html>

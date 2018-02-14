@@ -1,0 +1,19 @@
+{
+  "name": "panikapp",
+  "version": "1.0.0",
+  "description": "This app gets the location of a user when the panik button is pressed",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "axios": "^0.16.2",
+    "body-parser": "*",
+    "dateformat": "^3.0.2",
+    "express": "*",
+    "mongodb": "^2.2.33",
+    "socket.io": "*",
+    "underscore": "*"
+  },
+  "license": "ISC"
+}
