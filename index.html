@@ -31,6 +31,16 @@
         line-height: 30px;
         padding-left: 10px;
       }
+      #get_direction {
+        background: #3878c7;
+        padding: 10px 40px;
+        border: #3672bb 1px solid;
+        border-radius: 2px;
+        color: #FFF;
+        font-size: 0.9em;
+        cursor:pointer;
+        display:block;
+      }
     </style>
   </head>
 
@@ -101,7 +111,11 @@
 //                        map.setZoom(10);
                         var marker = new google.maps.Marker({
                             position: latlng,
-                            map: map
+                            map: map,
+                            icon: {
+                                path: google.maps.SymbolPath.CIRCLE,
+                                scale: 10
+                            }
                         });
 //                        map.setCenter(marker.getPosition());
 //                        map.panTo(marker.getPosition());
@@ -126,7 +140,7 @@
                         lat: currentLatitude,
                         lng: currentLongitude
                     };
-                    var infoWindowHTML = "<b>Location found</b><br>Latitude: " + currentLatitude + "<br>Longitude: " + currentLongitude;
+                    var infoWindowHTML = "<b>Location found</b>";
                     infoWindow = new google.maps.InfoWindow({map: map, content: infoWindowHTML});
                     infoWindow.setPosition(pos);
                     map.setCenter(pos);
